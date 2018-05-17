@@ -128,6 +128,10 @@ class OptionStage():
                     if suit.inside(mouse[0],mouse[1]):
                         self.game.click_sound()
                         self.__active_group(self.arraySuit, suit, "suit")
+                for difficulty in self.arrayDifficulty :
+                    if difficulty.inside(mouse[0],mouse[1]):
+                        self.game.click_sound()
+                        self.__active_group(self.arrayDifficulty, difficulty, "difficulty")
     
     def update(self):
         pass
