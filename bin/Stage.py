@@ -121,6 +121,9 @@ class OptionStage():
                         pg.mixer.music.play()
                     else:
                         pg.mixer.music.pause()
+                if self.creditos.inside(mouse[0],mouse[1]):
+                    self.game.click_sound()
+                    self.goCreditos()
     
     def update(self):
         pass
@@ -132,7 +135,7 @@ class OptionStage():
         self.game.changeState(MenuStage(self.game, self.win))
     
     def goCreditos(self):
-        pass
+        self.game.changeState(CreditsStage(self.game, self.win))
 
     def __loadComponents(self,win):
         self.arrayComponente.append(Component(win,pg.image.load("../assets/options/bg.jpg") ,None, 0,0 ,0))
@@ -167,3 +170,53 @@ class OptionStage():
         for component in group:
             if group.index(component) != index :
                 component.active(False)
+
+class CreditsStage():
+    def __init__(self, game , win):
+        self.game = game
+        self.win = win
+        self.arrayComponente = []
+        self.back = Component(win,pg.image.load("../assets/options/back.png") ,None, 25,25 ,0)
+        self.__loadComponents()
+
+    def draw(self):
+        for component in self.arrayComponente:
+            component.draw()
+            component.hover()
+    
+    def events(self):
+        mouse = pg.mouse.get_pos()
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                pg.quit()
+                sys.exit()
+            if event.type == pg.MOUSEBUTTONDOWN:
+                if self.back.inside(mouse[0],mouse[1]):
+                    self.game.click_sound()
+                    self.goOptions()
+            
+    
+    def update(self):
+        pass
+    
+    def goOptions(self):
+        self.game.changeState(OptionStage(self.game, self.win))
+
+    def goMenu(self):
+        pass
+    
+    def __loadComponents(self):
+        self.arrayComponente.append(Component(self.win,pg.image.load("../assets/options/bg.jpg") ,None, 0,0 ,0))
+        self.arrayComponente.append(Component(self.win,pg.image.load("../assets/credits/creditos.png") ,None, 322,50 ,0))
+        self.arrayComponente.append(Component(self.win,pg.image.load("../assets/credits/jason_foto.png") ,None, 182,181 ,0))
+        self.arrayComponente.append(Component(self.win,pg.image.load("../assets/credits/jason.png") ,None, 135,316 ,0))
+        self.arrayComponente.append(Component(self.win,pg.image.load("../assets/credits/claudia_foto.png") ,None, 182,553 ,0))
+        self.arrayComponente.append(Component(self.win,pg.image.load("../assets/credits/claudia.png") ,None, 135,688 ,0))
+        self.arrayComponente.append(Component(self.win,pg.image.load("../assets/credits/carlos_foto.png") ,None, 537,367 ,0))
+        self.arrayComponente.append(Component(self.win,pg.image.load("../assets/credits/carlos.png") ,None, 490,502 ,0))
+        self.arrayComponente.append(Component(self.win,pg.image.load("../assets/credits/cristina_foto.png") ,None, 892,181 ,0))
+        self.arrayComponente.append(Component(self.win,pg.image.load("../assets/credits/cristina.png") ,None, 845,316 ,0))
+        self.arrayComponente.append(Component(self.win,pg.image.load("../assets/credits/casanova_foto.png") ,None, 892,553 ,0))
+        self.arrayComponente.append(Component(self.win,pg.image.load("../assets/credits/casanova.png") ,None, 845,688 ,0))
+        self.arrayComponente.append(self.back)
+    
