@@ -107,6 +107,20 @@ class OptionStage():
                 if self.back.inside(mouse[0],mouse[1]):
                     self.game.click_sound()
                     self.goMenu()
+                if self.sound.inside(mouse[0],mouse[1]):
+                    self.game.click_sound()
+                    self.game.sound = 1 - self.game.sound 
+                    self.database.update("sound",self.game.sound)
+                    self.sound.active(1-self.game.sound)
+                if self.music.inside(mouse[0],mouse[1]):
+                    self.game.click_sound()
+                    self.game.music = 1 - self.game.music 
+                    self.database.update("music",self.game.music)
+                    self.music.active(1-self.game.music)
+                    if self.game.music == 1:
+                        pg.mixer.music.play()
+                    else:
+                        pg.mixer.music.pause()
     
     def update(self):
         pass
