@@ -51,7 +51,7 @@ class MenuStage():
         pass
     
     def goNivelOne(self):
-        pass
+        self.game.changeState(NivelOne(self.game, self.win))
 
     def __loadComponents(self, win):
         self.arrayComponente.append(Component(win,pg.image.load("../assets/menu/bg.jpg") ,None, 0,0 ,0))
@@ -228,3 +228,32 @@ class CreditsStage():
         self.arrayComponente.append(Component(self.win,pg.image.load("../assets/credits/casanova.png") ,None, 845,688 ,0))
         self.arrayComponente.append(self.back)
     
+class NivelOne():
+    def __init__(self, game , win):
+        self.game = game
+        self.win = win
+        self.arrayComponente = []
+        self.bg = Component(win,pg.image.load("../assets/mountain.png").convert() ,None, 0,0 ,0)
+        
+
+
+        self.__loadComponents(win)
+    
+    def draw(self):
+        self.win.blit(self.bg.currentImage, (0, 0))
+    
+    def events(self):
+        mouse = pg.mouse.get_pos()
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                pg.quit()
+                sys.exit()
+            
+        
+
+    
+    def update(self):
+        pass
+        
+    def __loadComponents(self, win):
+        self.arrayComponente.append(self.bg)
