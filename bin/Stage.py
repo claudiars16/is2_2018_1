@@ -98,10 +98,15 @@ class OptionStage():
             component.hover()
     
     def events(self):
+        mouse = pg.mouse.get_pos()
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 pg.quit()
                 sys.exit()
+            if event.type == pg.MOUSEBUTTONDOWN:
+                if self.back.inside(mouse[0],mouse[1]):
+                    self.game.click_sound()
+                    self.goMenu()
     
     def update(self):
         pass
