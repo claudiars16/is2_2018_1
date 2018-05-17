@@ -2,6 +2,7 @@ import pygame as pg
 import sys
 from random import randint
 from db.database import Database
+from Stage import MenuStage
 from config import *
 
 class Game():
@@ -13,26 +14,49 @@ class Game():
         self.win = pg.display.set_mode((WIDTH, HEIGHT))
         self.clock = pg.time.Clock()
         self.running = True
+        params = self.__load()
+        self.difficulty = params[2]
+        self.suit = params[1]
+        self.sound = params[3]
+        self.music = params[4]
+        self.stage = MenuStage(self, self.win)
+        self.sound_click = pg.mixer.Sound("../assets/sound/click.wav")
+        pg.mixer.music.load("../assets/sound/game.wav")
+        if self.music == 1:
+            pg.mixer.music.play()
     
     def new(self):
         self.run()
     
     def run(self):
-        pass
+        self.playing = True
+        while self.playing:
+            self.clock.tick(FPS)
+            self.events()
+            self.update()
+            self.draw()
     
     def update(self):
-        pass
+        self.stage.update()
     
     def events(self):
-        pass
+        self.stage.events()
     
     def draw(self):
-        pass
+        self.stage.draw()
+        pg.display.flip()
     
     def changeState(self, state):
-        pass
+        self.stage = state
     
-    
+    def click_sound(self):
+        if self.sound == 1 :
+            pg.mixer.Sound.play(self.sound_click)
+
+    def __load(self):
+        database = Database()
+        res = database.get_all()
+        return res
     
     
 g = Game()
