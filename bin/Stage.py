@@ -124,6 +124,10 @@ class OptionStage():
                 if self.creditos.inside(mouse[0],mouse[1]):
                     self.game.click_sound()
                     self.goCreditos()
+                for suit in self.arraySuit :
+                    if suit.inside(mouse[0],mouse[1]):
+                        self.game.click_sound()
+                        self.__active_group(self.arraySuit, suit, "suit")
     
     def update(self):
         pass
