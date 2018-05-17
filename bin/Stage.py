@@ -45,7 +45,7 @@ class MenuStage():
         pass
 
     def goOptions(self):
-        pass
+        self.game.changeState(OptionStage(self.game, self.win))
 
     def goMenu(self):
         pass
@@ -59,3 +59,92 @@ class MenuStage():
         self.arrayComponente.append(self.play)
         self.arrayComponente.append(self.options)
         self.arrayComponente.append(self.exit)
+
+class OptionStage():
+
+    def __init__(self, game, win):
+        self.database = Database()
+        self.game = game
+        self.win = win
+        self.arrayComponente = []
+        self.arraySuit = []
+        self.arrayDifficulty = []
+        self.suit_a = Component(win,pg.image.load("../assets/options/suit_a.png") ,
+                                                pg.image.load("../assets/options/suit_a_press.png"), 400,151 ,1)
+        self.suit_b =  Component(win,pg.image.load("../assets/options/suit_b.png") ,
+                                                pg.image.load("../assets/options/suit_b_press.png"), 550,151 ,1)                                       
+        self.suit_c = Component(win,pg.image.load("../assets/options/suit_c.png") ,
+                                                pg.image.load("../assets/options/suit_c_press.png"), 700,151 ,1)
+        self.difficulty_1 = Component(win,pg.image.load("../assets/options/level_1.png") ,
+                                                pg.image.load("../assets/options/level_1_press.png"), 400,402 ,1)
+        self.difficulty_2 = Component(win,pg.image.load("../assets/options/level_2.png") ,
+                                                pg.image.load("../assets/options/level_2_press.png"), 550,402 ,1)
+        self.difficulty_3 = Component(win,pg.image.load("../assets/options/level_3.png") ,
+                                                pg.image.load("../assets/options/level_3_press.png"), 700,402 ,1)
+        self.music = Component(win,pg.image.load("../assets/options/music_on.png") ,
+                                                pg.image.load("../assets/options/music_off.png"), 475,653 ,1)
+        self.sound = Component(win,pg.image.load("../assets/options/sound_on.png") ,
+                                                pg.image.load("../assets/options/sound_off.png"), 625,653 ,1)
+        self.back = Component(win,pg.image.load("../assets/options/back.png") ,None, 25,25 ,0)
+        
+        self.creditos = Component(win,pg.image.load("../assets/options/creditos.png") ,None, 1075,675 ,0)
+
+        self.__loadComponents(win)
+        self.__init_componets()
+        
+    def draw(self):
+        for component in self.arrayComponente:
+            component.draw()
+            component.hover()
+    
+    def events(self):
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                pg.quit()
+                sys.exit()
+    
+    def update(self):
+        pass
+
+    def goOptions(self):
+        pass
+    
+    def goMenu(self):
+        self.game.changeState(MenuStage(self.game, self.win))
+    
+    def goCreditos(self):
+        pass
+
+    def __loadComponents(self,win):
+        self.arrayComponente.append(Component(win,pg.image.load("../assets/options/bg.jpg") ,None, 0,0 ,0))
+        self.arrayComponente.append(Component(win,pg.image.load("../assets/options/select_suit.png") ,None, 322,41 ,0))
+        self.arraySuit.append(self.suit_a)
+        self.arraySuit.append(self.suit_b)
+        self.arraySuit.append(self.suit_c)
+        self.arrayComponente = self.arrayComponente + self.arraySuit
+        self.arrayComponente.append(Component(win,pg.image.load("../assets/options/select_level.png") ,None, 322,292 ,0))
+        self.arrayDifficulty.append(self.difficulty_1)
+        self.arrayDifficulty.append(self.difficulty_2)
+        self.arrayDifficulty.append(self.difficulty_3)
+        self.arrayComponente = self.arrayComponente + self.arrayDifficulty
+        self.arrayComponente.append(Component(win,pg.image.load("../assets/options/select_sound.png") ,None, 431,543 ,0))
+        self.arrayComponente.append(self.music)
+        self.arrayComponente.append(self.sound)
+
+        self.arrayComponente.append(self.back)
+        self.arrayComponente.append(self.creditos)
+
+    def __init_componets(self):
+            self.arraySuit[self.game.suit-1].active(True)
+            self.arrayDifficulty[self.game.difficulty-1].active(True)
+            self.sound.active(1-self.game.sound)
+            self.music.active(1-self.game.music)
+        
+    def __active_group(self, group, element, property):
+        element.active(True)
+        index = group.index(element)
+        setattr(self.game, property, index + 1)
+        self.database.update(property, index+1)
+        for component in group:
+            if group.index(component) != index :
+                component.active(False)
