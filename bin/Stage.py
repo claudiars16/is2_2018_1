@@ -234,13 +234,24 @@ class NivelOne():
         self.win = win
         self.arrayComponente = []
         self.bg = Component(win,pg.image.load("../assets/mountain.png").convert() ,None, 0,0 ,0)
-        
+        self.bgWidth, self.bgHeight = self.bg.currentImage.get_rect().size
+        self.stageWidth = self.bgWidth * 2
+        self.stagePosX = 0
+
+        self.startScrollingPosX = HW
+
+        self.circleRadius = 25
+        self.circlePosX = self.circleRadius
+
+        self.playerPosX = self.circleRadius
+        self.playerPosY = 585
+        self.playerVelocityX = 0
 
 
         self.__loadComponents(win)
     
     def draw(self):
-        self.win.blit(self.bg.currentImage, (0, 0))
+        pg.draw.circle(self.win, BLACK, (int(self.circlePosX), int(self.playerPosY) - 25), self.circleRadius, 0)
     
     def events(self):
         mouse = pg.mouse.get_pos()
@@ -253,7 +264,26 @@ class NivelOne():
 
     
     def update(self):
-        pass
+        k = pg.key.get_pressed()
+        if k[pg.K_RIGHT]:
+            self.playerVelocityX = 1
+        elif k[pg.K_LEFT]:
+            self.playerVelocityX = -1
+        else:
+            self.playerVelocityX = 0
+        self.playerPosX += self.playerVelocityX
+        if self.playerPosX > self.stageWidth - self.circleRadius: self.playerPosX = self.stageWidth - self.circleRadius
+        if self.playerPosX < self.circleRadius: self.playerPosX = self.circleRadius
+        if self.playerPosX < self.startScrollingPosX: self.circlePosX = self.playerPosX
+        elif self.playerPosX > self.stageWidth - self.startScrollingPosX: self.circlePosX = self.playerPosX - self.stageWidth + WIDTH
+        else:
+            self.circlePosX = self.startScrollingPosX
+            self.stagePosX += -self.playerVelocityX
+        
+        rel_x = self.stagePosX % self.bgWidth
+        self.win.blit(self.bg.currentImage, (rel_x - self.bgWidth, 0))
+        if rel_x < WIDTH:
+            self.win.blit(self.bg.currentImage, (rel_x, 0))
         
     def __loadComponents(self, win):
         self.arrayComponente.append(self.bg)
