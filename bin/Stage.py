@@ -1,8 +1,11 @@
-import pygame as pg
 import sys
+import pygame as pg
 from Component import Component
-from db.database import Database
 from config import *
+from db.database import Database
+from Sprites import *
+import requests as requests
+import json
 
 class MenuStage():
 
