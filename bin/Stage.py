@@ -256,22 +256,92 @@ class NivelOne():
         self.game = game
         self.win = win
         self.arrayComponente = []
-        self.bg = Component(win,pg.image.load("../assets/mountain.png").convert() ,None, 0,0 ,0)
+        self.bg = Component(win, pg.image.load(
+            "../assets/one/f.jpg"), None, 0, 0, 0)
+        self.win.blit(self.bg.currentImage, (0, 0))
         self.bgWidth, self.bgHeight = self.bg.currentImage.get_rect().size
-        self.stageWidth = self.bgWidth * 2
-        self.stagePosX = 0
-
+        self.stageWidth = self.bgWidth * 4
         self.startScrollingPosX = HW
+        self.stagePosX = 0
+        self.pauseState = False
+        self.loseState = False
+        self.name = ""
+        # CONJUNTO DE IMAGENES
+        self.players = pg.sprite.Group()
+        self.platforms = pg.sprite.Group()
+        self.bases = pg.sprite.Group()
+        self.lifes = pg.sprite.Group()
+        self.tumis = pg.sprite.Group()
+        self.foods = pg.sprite.Group()
 
-        self.circleRadius = 25
-        self.circlePosX = self.circleRadius
-
-        self.playerPosX = self.circleRadius
-        self.playerPosY = 585
-        self.playerVelocityX = 0
-
-
-        self.__loadComponents(win)
+        #ADD PLAYER
+        self.player = Player(self)
+        self.players.add(self.player)
+        #ADD PLATFORMS
+        base = Platform(0, FLOOR , 3*WIDTH, HEIGHT - FLOOR)
+        pt = Platform(200 , FLOOR - 25 , 100 , 20)
+        p1 = Platform(750 , FLOOR - 100 , 100 , 20)
+        p2 = Platform(1135.5 , FLOOR - 100 , 100 , 20)
+        p3 = Platform(1411 , FLOOR - 200 , 50 , 20)
+        p4 = Platform(1636.5 , FLOOR - 100 , 100 , 20)
+        p5 = Platform(2350 , FLOOR - 100 , 100 , 20)
+        p6 = Platform(3055.5 , FLOOR - 100 , 100 , 20)
+        p7 = Platform(3331 , FLOOR - 200 , 50 , 20)
+        p8 = Platform(3556.5 , FLOOR - 100 , 100 , 20)
+        self.bases.add(base)
+        self.platforms.add(pt)
+        self.platforms.add(p1)
+        self.platforms.add(p2)
+        self.platforms.add(p3)
+        self.platforms.add(p4)
+        self.platforms.add(p5)
+        self.platforms.add(p6)
+        self.platforms.add(p7)
+        self.platforms.add(p8)
+        #ADD LIFE
+        l1 = Life(1423.5 , FLOOR - 225)
+        l2 = Life(3343.5 , FLOOR - 225)
+        self.lifes.add(l1)
+        self.lifes.add(l2)
+        #ADD TUMIS
+        t1 = Tumi(1674 ,FLOOR - 150)
+        t2 = Tumi(3093 ,FLOOR - 150)
+        self.tumis.add(t1)
+        self.tumis.add(t2)
+        #ADD FOOD
+        f1 = Food(1160 , FLOOR - 125)
+        self.foods.add(f1)
+        #LETRA
+        self.myfont = pg.font.SysFont("monospace", 20, True)
+        #PUNTAJE
+        self.poits = 0
+        #LIFES
+        self.lifes_points = 3
+        #LOAD IMAGES
+        self.image_life = pg.image.load('../assets/one/life.png')
+        #LOAD COMPONENTS
+        self.arrayComponents = []
+        self.arrayPause = []
+        self.arrayLose = []
+        self.pause = Component(win , pg.image.load(
+            "../assets/one/pause.png") , None , 905 , 5 , 0)
+        #LOAD COMPONENTS PAUSE
+        self.marco_pause = Component(win , pg.image.load(
+            "../assets/pause/pause_marco.png") , None ,280 , 160 , 0)
+        self.play = Component(win, pg.image.load("../assets/pause/btn_play.png"),
+                              pg.image.load("../assets/pause/btn_alt_play.png"), 325.3, 340, 1)
+        self.exit = Component(win, pg.image.load("../assets/pause/btn_exit.png"),
+                              pg.image.load("../assets/pause/btn_alt_exit.png"), 502.6, 340, 1)
+        
+        #LOAD COMPONENTS LOSE
+        self.marco_lose = Component(win , pg.image.load(
+            "../assets/lose/lose_marco.png") , None ,280 , 160 , 0)
+        self.save = Component(win, pg.image.load("../assets/lose/btn_guardar.png"),
+                              pg.image.load("../assets/lose/btn_alt_guardar.png"), 325.3, 340, 1)
+        self.exit_lose = Component(win, pg.image.load("../assets/lose/btn_exit.png"),
+                              pg.image.load("../assets/lose/btn_alt_exit.png"), 502.6, 340, 1)
+        
+        self.__loadComponents()
     
     def draw(self):
         pg.draw.circle(self.win, BLACK, (int(self.circlePosX), int(self.playerPosY) - 25), self.circleRadius, 0)
