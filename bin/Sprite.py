@@ -105,3 +105,15 @@ class Life(pg.sprite.Sprite):
 
     def update(self , dis):
         self.rect.x -= dis
+
+class Tumi(pg.sprite.Sprite):
+
+    def __init__(self , x, y):
+        pg.sprite.Sprite.__init__(self)
+        self.image = pg.image.load("../assets/one/tumi.png")
+        self.rect = self.image.get_rect()
+        self.rect.x = x 
+        self.rect.y = y
+
+    def update(self , dis):
+        self.rect.x -= dis
