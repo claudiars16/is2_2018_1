@@ -344,36 +344,141 @@ class NivelOne():
         self.__loadComponents()
     
     def draw(self):
-        pg.draw.circle(self.win, BLACK, (int(self.circlePosX), int(self.playerPosY) - 25), self.circleRadius, 0)
+        self.bases.draw(self.win)
+        self.players.draw(self.win)
+        self.platforms.draw(self.win)
+        self.lifes.draw(self.win)
+        self.tumis.draw(self.win)
+        self.foods.draw(self.win)
+        #RENDER POINTS
+        label = self.myfont.render("PUNTAJE : {}".format(self.poits), 1, BLACK)
+        self.win.blit(label, (5, 0))
+        #RENDER LIFE
+        lifes = self.myfont.render("VIDAS : ", 1, BLACK)
+        place  = HW +  100
+        self.win.blit(lifes, (HW, 0))
+        for l in range(self.lifes_points):
+            self.win.blit(self.image_life , (place, 0))
+            place += 30
+        for component in self.arrayComponents:
+            component.draw()
+        if  self.pauseState:
+            for component in self.arrayPause:
+                component.draw()
+                component.hover()
+        if self.loseState:
+            for component in self.arrayLose:
+                component.draw()
+                component.hover()
+            #RENDER NAME
+            pg.draw.rect(self.win,(255,255,255),(330,270,300,40))
+            n = self.myfont.render(self.name, 1, BLACK)
+            self.win.blit(n, (350,280))
     
     def events(self):
         mouse = pg.mouse.get_pos()
+        move = 0
+        k = pg.key.get_pressed()
+        if k[pg.K_RIGHT]:
+            move  = 1
+        elif k[pg.K_LEFT]:
+            move = -1
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 pg.quit()
                 sys.exit()
-            
+            if not self.pauseState and  not self.loseState:
+                if event.type == pg.KEYDOWN:
+                    if  event.key == pg.K_SPACE:
+                        self.player.jump()
+                if event.type == pg.MOUSEBUTTONDOWN:
+                    if self.pause.inside(mouse[0], mouse[1]):
+                        self.goPause(True)
+            if self.pauseState:
+                if event.type == pg.MOUSEBUTTONDOWN:
+                    if self.play.inside(mouse[0], mouse[1]):
+                        self.goPause(False)
+                    if self.exit.inside(mouse[0], mouse[1]):
+                        self.goMenu()
+            if self.loseState:
+                if event.type == pg.KEYDOWN:
+                    if event.unicode.isalpha():
+                        self.name += event.unicode
+                    elif event.key == pg.K_BACKSPACE:
+                        self.name = self.name[:-1]
+                    elif event.key == pg.K_RETURN:
+                        self.name = ""
+                if event.type == pg.MOUSEBUTTONDOWN:
+                    if self.save.inside(mouse[0], mouse[1]):
+                        self.save_score()
+                    if self.exit_lose.inside(mouse[0], mouse[1]):
+                        self.goMenu()
+                        
+
+        if not self.pauseState and not self.loseState:
+            self.player.move(move)
+            self.move_screen(move)
+
     def update(self):
-        k = pg.key.get_pressed()
-        if k[pg.K_RIGHT]:
-            self.playerVelocityX = 1
-        elif k[pg.K_LEFT]:
-            self.playerVelocityX = -1
-        else:
-            self.playerVelocityX = 0
-        self.playerPosX += self.playerVelocityX
-        if self.playerPosX > self.stageWidth - self.circleRadius: self.playerPosX = self.stageWidth - self.circleRadius
-        if self.playerPosX < self.circleRadius: self.playerPosX = self.circleRadius
-        if self.playerPosX < self.startScrollingPosX: self.circlePosX = self.playerPosX
-        elif self.playerPosX > self.stageWidth - self.startScrollingPosX: self.circlePosX = self.playerPosX - self.stageWidth + WIDTH
-        else:
-            self.circlePosX = self.startScrollingPosX
-            self.stagePosX += -self.playerVelocityX
         
-        rel_x = self.stagePosX % self.bgWidth
-        self.win.blit(self.bg.currentImage, (rel_x - self.bgWidth, 0))
+        #CHECK IF PLAYER HIT THE FLOOR
+        hit_floor = pg.sprite.spritecollide(self.player , self.bases , False)
+        if hit_floor:
+                self.player.pos.y = hit_floor[0].rect.top + 1
+                self.player.vel.y = 0
+
+        # CHECK IF PLAYER HIT A PLATFOR
+        if  self.player.vel.y > 0:
+            hits_platfroms = pg.sprite.spritecollide(self.player , self.platforms , False)
+            if hits_platfroms:
+                self.player.pos.y = hits_platfroms[0].rect.top + 1
+                self.player.vel.y = 0
+           
+        #CHECK HIT A LIFE
+        hits_lifes = pg.sprite.spritecollide(self.player, self.lifes , False)
+        if hits_lifes:
+            self.game.life_sound()
+            self.lifes.remove(hits_lifes[0])
+            self.lifes_points += 1
+        #CHECK HIT A TUMI
+        hits_tumis = pg.sprite.spritecollide(self.player, self.tumis , False)
+        if hits_tumis:
+            self.game.coin_sound()
+            self.tumis.remove(hits_tumis[0])
+            self.poits += 10
+        #CHECK HIT A FOOD
+        hits_food = pg.sprite.spritecollide(self.player, self.foods , False)
+        if hits_food:
+            self.game.food_sound()
+            self.foods.remove(hits_food[0])
+            #self.poits += 10
+
+    def __loadComponents(self):
+        self.arrayComponents.append(self.pause)
+        self.arrayPause.append(self.marco_pause)
+        self.arrayPause.append(self.play)
+        self.arrayPause.append(self.exit)
+        self.arrayLose.append(self.marco_lose)
+        self.arrayLose.append(self.exit_lose)
+        self.arrayLose.append(self.save)
+        
+    def goPause(self, state):
+        self.pauseState = state
+
+    def goMenu(self):
+        self.game.changeState(MenuStage(self.game, self.win))
+
+    def move_screen(self, dir):
+        rel_x = round(self.stagePosX % self.bgWidth,0)
+        self.win.blit(self.bg.currentImage,
+                            (rel_x - self.bgWidth, 0))
         if rel_x < WIDTH:
             self.win.blit(self.bg.currentImage, (rel_x, 0))
-        
-    def __loadComponents(self, win):
-        self.arrayComponente.append(self.bg)
+        if self.player.rect.center[0] == self.startScrollingPosX:
+            self.platforms.update(self.player.des)
+            self.lifes.update(self.player.des)
+            self.tumis.update(self.player.des)
+            self.foods.update(self.player.des)
+    
+    def save_score(self):
+        pass
