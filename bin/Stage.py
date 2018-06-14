@@ -481,4 +481,8 @@ class NivelOne():
             self.foods.update(self.player.des)
     
     def save_score(self):
-        pass
+        payload = {"nombre" : self.name , "puntaje" : self.poits}
+        r = requests.post(URL_API + "/ranking", data=payload)
+        print("Status : {}".format(r.status_code))
+        print(r.json())
+        self.goMenu()
