@@ -283,9 +283,6 @@ class NivelOne():
                 pg.quit()
                 sys.exit()
             
-        
-
-    
     def update(self):
         k = pg.key.get_pressed()
         if k[pg.K_RIGHT]:
