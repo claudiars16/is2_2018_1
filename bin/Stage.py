@@ -412,7 +412,7 @@ class NivelOne():
             #RENDER NAME
             pg.draw.rect(self.win,(255,255,255),(330,400,300,40))
             n = self.myfont.render(self.name, 1, BLACK)
-            self.win.blit(n, (350,366))
+            self.win.blit(n, (350,410))
             s_tumis = self.myfontNumber.render(str(self.poits), 1, BLACK)
             s_food = self.myfontNumber.render(str(self.nfoods), 1, BLACK)
             self.win.blit(s_tumis, (320, 355))
