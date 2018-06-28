@@ -478,7 +478,7 @@ class NivelOne():
         self.arrayLose.append(self.save)
         
     def goPause(self, state):
-        self.pauseState = state
+        self.pauseState = state #CAMBIAR IR A PAUSE O SALIR DEL PAUSE
 
     def goMenu(self):
         self.game.changeState(MenuStage(self.game, self.win))
