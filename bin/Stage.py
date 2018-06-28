@@ -7,6 +7,7 @@ from Sprites import *
 import requests as requests
 import json
 
+
 class MenuStage():
 
     def __init__(self, game, win):
@@ -73,6 +74,7 @@ class MenuStage():
         self.arrayComponente.append(self.options)
         self.arrayComponente.append(self.exit)
         self.arrayComponente.append(self.ranking)
+
 
 class OptionStage():
 
@@ -200,6 +202,7 @@ class OptionStage():
             if group.index(component) != index:
                 component.active(False)
 
+
 class CreditsStage():
     def __init__(self, game, win):
         self.game = game
@@ -260,9 +263,10 @@ class CreditsStage():
         self.arrayComponente.append(Component(self.win, pg.image.load(
             "../assets/credits/casanova.png"), None, 676, 550, 0))
         self.arrayComponente.append(self.back)
-   
+
+
 class NivelOne():
-    def __init__(self, game , win):
+    def __init__(self, game, win):
         self.game = game
         self.win = win
         self.arrayComponente = []
@@ -375,14 +379,16 @@ class NivelOne():
             "../assets/lose/food.png"), None, 600, 270, 1)
         
         self.__loadComponents()
-    
+        
     def draw(self):
         self.bases.draw(self.win)
         self.players.draw(self.win)
+        self.enemys.draw(self.win)
         self.platforms.draw(self.win)
         self.lifes.draw(self.win)
         self.tumis.draw(self.win)
         self.foods.draw(self.win)
+        self.bullets.draw(self.win)
         #RENDER POINTS
         label = self.myfont.render("PUNTAJE : {}".format(self.poits), 1, BLACK)
         self.win.blit(label, (5, 0))
@@ -404,26 +410,34 @@ class NivelOne():
                 component.draw()
                 component.hover()
             #RENDER NAME
-            pg.draw.rect(self.win,(255,255,255),(330,270,300,40))
+            pg.draw.rect(self.win,(255,255,255),(330,400,300,40))
             n = self.myfont.render(self.name, 1, BLACK)
-            self.win.blit(n, (350,280))
-    
+            self.win.blit(n, (350,366))
+            s_tumis = self.myfontNumber.render(str(self.poits), 1, BLACK)
+            s_food = self.myfontNumber.render(str(self.nfoods), 1, BLACK)
+            self.win.blit(s_tumis, (320, 355))
+            self.win.blit(s_food, (620, 330))
+
     def events(self):
         mouse = pg.mouse.get_pos()
         move = 0
         k = pg.key.get_pressed()
         if k[pg.K_RIGHT]:
             move  = 1
+            self.player.side = 1
         elif k[pg.K_LEFT]:
             move = -1
+            self.player.side = -1
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 pg.quit()
                 sys.exit()
             if not self.pauseState and  not self.loseState:
                 if event.type == pg.KEYDOWN:
-                    if  event.key == pg.K_SPACE:
+                    if  event.key == pg.K_UP:
                         self.player.jump()
+                    if event.key == pg.K_SPACE:
+                        self.player.shoot()
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if self.pause.inside(mouse[0], mouse[1]):
                         self.goPause(True)
@@ -515,9 +529,9 @@ class NivelOne():
         self.arrayLose.append(self.player_dead)
         self.arrayLose.append(self.lose_tumi)
         self.arrayLose.append(self.lose_food)
-        
+
     def goPause(self, state):
-        self.pauseState = state #CAMBIAR IR A PAUSE O SALIR DEL PAUSE
+        self.pauseState = state
 
     def goMenu(self):
         self.game.changeState(MenuStage(self.game, self.win))
@@ -526,20 +540,25 @@ class NivelOne():
         rel_x = round(self.stagePosX % self.bgWidth,0)
         self.win.blit(self.bg.currentImage,
                             (rel_x - self.bgWidth, 0))
+        self.win.blit(self.floor.currentImage,
+                            (rel_x - self.bgWidth, FLOOR))
+        
         if rel_x < WIDTH:
             self.win.blit(self.bg.currentImage, (rel_x, 0))
+            self.win.blit(self.floor.currentImage, (rel_x, FLOOR))
         if self.player.rect.center[0] == self.startScrollingPosX:
             self.platforms.update(self.player.des)
             self.lifes.update(self.player.des)
             self.tumis.update(self.player.des)
             self.foods.update(self.player.des)
+            self.enemys.update(self.player.des)
     
     def save_score(self):
         payload = {"nombre" : self.name , "puntaje" : self.poits}
         r = requests.post(URL_API + "/ranking", data=payload)
         print("Status : {}".format(r.status_code))
-        print(r.json())
         self.goMenu()
+
 
 class Ranking():
 
