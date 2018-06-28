@@ -20,6 +20,9 @@ class MenuStage():
                                  pg.image.load("../assets/menu/btn_alt_options.png"), 414, 440, 1)
         self.exit = Component(win, pg.image.load("../assets/menu/btn_exit.png"),
                               pg.image.load("../assets/menu/btn_alt_exit.png"), 414, 520, 1)
+        self.ranking = Component(win, pg.image.load(
+            "../assets/menu/ranking.png"), None, 860, 540, 0)
+
         self.__loadComponents(win)
 
     def draw(self):
@@ -43,6 +46,8 @@ class MenuStage():
                 if self.play.inside(mouse[0], mouse[1]):
                     self.game.click_sound()
                     self.goNivelOne()
+                if self.ranking.inside(mouse[0], mouse[1]):
+                    self.goRanking()
 
     def update(self):
         pass
@@ -55,6 +60,9 @@ class MenuStage():
 
     def goNivelOne(self):
         self.game.changeState(NivelOne(self.game, self.win))
+    
+    def goRanking(self):
+        self.game.changeState(Ranking(self.game, self.win))
 
     def __loadComponents(self, win):
         self.arrayComponente.append(
@@ -64,7 +72,7 @@ class MenuStage():
         self.arrayComponente.append(self.play)
         self.arrayComponente.append(self.options)
         self.arrayComponente.append(self.exit)
-
+        self.arrayComponente.append(self.ranking)
 
 class OptionStage():
 
@@ -191,7 +199,6 @@ class OptionStage():
         for component in group:
             if group.index(component) != index:
                 component.active(False)
-
 
 class CreditsStage():
     def __init__(self, game, win):
@@ -489,3 +496,57 @@ class NivelOne():
         print("Status : {}".format(r.status_code))
         print(r.json())
         self.goMenu()
+
+class Ranking():
+
+    def __init__(self, game, win):
+        self.game = game
+        self.win = win
+        self.arrayComponente = []
+        #LETRA
+        self.myfont = pg.font.SysFont("monospace", 40, True)
+        self.back = Component(win, pg.image.load(
+            "../assets/ranking/back.png"), None, 20, 20, 0)
+        self.rankings = self.getRanking()
+        self.__loadComponents()
+    
+    def draw(self):
+        for component in self.arrayComponente:
+            component.draw()
+            component.hover()
+        #RENDER POINTS
+        inicio =  130
+        for ranking in self.rankings:
+            label = self.myfont.render("{}:  {}".format(ranking.get("nombre").upper(),ranking.get("puntaje")), 1, BLACK)
+            self.win.blit(label, (280, inicio))
+            inicio += 80
+
+    def update(self):
+        pass
+
+    def events(self):
+        mouse = pg.mouse.get_pos()
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                pg.quit()
+                sys.exit()
+            if event.type == pg.MOUSEBUTTONDOWN:
+                if self.back.inside(mouse[0], mouse[1]):
+                        self.game.click_sound()
+                        self.goMenu()
+
+    def __loadComponents(self):
+        self.arrayComponente.append(
+            Component(self.win, pg.image.load("../assets/ranking/bg.jpg"), None, 0, 0, 0))
+        self.arrayComponente.append(
+            Component(self.win, pg.image.load("../assets/ranking/tabla.png"), None, 230, 70, 0))
+        self.arrayComponente.append(self.back)
+    
+    def goMenu(self):
+        self.game.changeState(MenuStage(self.game, self.win))
+
+    def getRanking(self):
+        r = requests.get(URL_API + "/ranking")
+        return r.json()
+
+
