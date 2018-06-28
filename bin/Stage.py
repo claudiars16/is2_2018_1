@@ -511,6 +511,10 @@ class NivelOne():
         self.arrayLose.append(self.marco_lose)
         self.arrayLose.append(self.exit_lose)
         self.arrayLose.append(self.save)
+        self.arrayLose.append(self.game_over_title)
+        self.arrayLose.append(self.player_dead)
+        self.arrayLose.append(self.lose_tumi)
+        self.arrayLose.append(self.lose_food)
         
     def goPause(self, state):
         self.pauseState = state #CAMBIAR IR A PAUSE O SALIR DEL PAUSE
