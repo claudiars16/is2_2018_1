@@ -453,20 +453,25 @@ class NivelOne():
             self.move_screen(move)
 
     def update(self):
-        
+        self.bullets.update()
+        for enemy in self.enemys:
+            enemy.animate()
+        self.player.jumping = True
         #CHECK IF PLAYER HIT THE FLOOR
         hit_floor = pg.sprite.spritecollide(self.player , self.bases , False)
         if hit_floor:
-                self.player.pos.y = hit_floor[0].rect.top + 1
+                self.player.jumping = False
+                self.player.pos.y = hit_floor[0].rect.top - 2
                 self.player.vel.y = 0
 
-        # CHECK IF PLAYER HIT A PLATFOR
+        #CHECK IF PLAYER HIT A PLATFOR
         if  self.player.vel.y > 0:
             hits_platfroms = pg.sprite.spritecollide(self.player , self.platforms , False)
             if hits_platfroms:
-                self.player.pos.y = hits_platfroms[0].rect.top + 1
+                self.player.jumping = False
+                self.player.pos.y = hits_platfroms[0].rect.top - 2
                 self.player.vel.y = 0
-           
+
         #CHECK HIT A LIFE
         hits_lifes = pg.sprite.spritecollide(self.player, self.lifes , False)
         if hits_lifes:
@@ -484,12 +489,19 @@ class NivelOne():
         if hits_food:
             self.game.food_sound()
             self.foods.remove(hits_food[0])
-            #self.poits += 10
-
+            self.nfoods += 5
+        
         #CHECK HIT TO ENMY
         hits_enemy = pg.sprite.spritecollide(self.player, self.enemys , False)
         if hits_enemy:
             self.loseState = True
+        
+        #CHECK IF BULLET TO ENEMY
+        for bullet in self.bullets:
+            hits_bullet =  pg.sprite.spritecollide(bullet, self.enemys , True)
+            if hits_bullet:
+                self.poits += 20
+                bullet.kill()
 
     def __loadComponents(self):
         self.arrayComponents.append(self.pause)
