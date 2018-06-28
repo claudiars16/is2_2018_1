@@ -463,6 +463,11 @@ class NivelOne():
             self.foods.remove(hits_food[0])
             #self.poits += 10
 
+        #CHECK HIT TO ENMY
+        hits_enemy = pg.sprite.spritecollide(self.player, self.enemys , False)
+        if hits_enemy:
+            self.loseState = True
+
     def __loadComponents(self):
         self.arrayComponents.append(self.pause)
         self.arrayPause.append(self.marco_pause)
