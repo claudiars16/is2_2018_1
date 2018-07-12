@@ -1082,4 +1082,124 @@ class NivelTwo():
         print("Status : {}".format(r.status_code))
         self.goMenu()
 
+class NivelCreate():
+    def __init__(self, game, win):
+        self.database = Database()
+        self.game = game
+        self.win = win
+        self.arrayComponente = []
+        self.arrayBackground = []
+        self.arrayEnemy = []
+        self.arrayWeapon = []
+        self.background = 1
+        self.enemy = 1
+        self.weapon = 1
+        self.f_1 = Component(win, pg.image.load("../assets/create/f_1.png"),
+                                pg.image.load("../assets/create/f_s_1.png"), 330, 10, 1)
+        self.f_2 = Component(win, pg.image.load("../assets/create/f_2.png"),
+                                pg.image.load("../assets/create/f_s_2.png"), 540, 10, 1)
+        self.f_3 = Component(win, pg.image.load("../assets/create/f_3.png"),
+                                pg.image.load("../assets/create/f_s_3.png"), 750, 10, 1)
+        self.e_1 = Component(win, pg.image.load("../assets/create/e_1.png"),
+                                      pg.image.load("../assets/create/e_s_1.png"), 400, 220, 1)
+        self.e_2 = Component(win, pg.image.load("../assets/create/e_2.png"),
+                                      pg.image.load("../assets/create/e_s_2.png"), 680, 220, 1)
+        self.w_1 = Component(win, pg.image.load("../assets/create/p_1.png"),
+                                pg.image.load("../assets/create/p_s_1.png"), 410, 430, 1)
+        self.w_2 = Component(win, pg.image.load("../assets/create/p_2.png"),
+                                pg.image.load("../assets/create/p_s_2.png"), 620, 430, 1)
+        self.w_3 = Component(win, pg.image.load("../assets/create/p_3.png"),
+                                pg.image.load("../assets/create/p_s_3.png"), 830, 430, 1)
+        self.back = Component(win, pg.image.load(
+            "../assets/options/back.png"), None, 10, 10, 0)
+
+        self.run = Component(win, pg.image.load(
+            "../assets/create/run.png"), None, 880, 540, 0)
+
+        self.__loadComponents(win)
+        self.__init_componets()
+
+    def draw(self):
+        for component in self.arrayComponente:
+            component.draw()
+            component.hover()
+
+    def events(self):
+        mouse = pg.mouse.get_pos()
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                pg.quit()
+                sys.exit()
+            if event.type == pg.MOUSEBUTTONDOWN:
+                if self.back.inside(mouse[0], mouse[1]):
+                    self.game.click_sound()
+                    self.goSelect()
+                if self.run.inside(mouse[0], mouse[1]):
+                    self.game.click_sound()
+                    self.goNivelThree()
+                for b in self.arrayBackground:
+                    if b.inside(mouse[0], mouse[1]):
+                        self.game.click_sound()
+                        self.__active_group(self.arrayBackground, b, "BG")
+                for e in self.arrayEnemy:
+                    if e.inside(mouse[0], mouse[1]):
+                        self.game.click_sound()
+                        self.__active_group(self.arrayEnemy, e, "ENEMY")
+                for w in self.arrayWeapon:
+                    if w.inside(mouse[0], mouse[1]):
+                        self.game.click_sound()
+                        self.__active_group(self.arrayWeapon, w, "WEAPON")
+
+    def update(self):
+        pass
+
+    def goOptions(self):
+        pass
+
+    def goSelect(self):
+        self.game.changeState(SelectLevel(self.game, self.win))
+
+    def goNivelThree(self):
+        self.game.changeState(NivelThree(self.game, self.win, self.background, self.enemy, self.weapon))
+
+    def __loadComponents(self, win):
+        self.arrayComponente.append(
+            Component(win, pg.image.load("../assets/options/bg.jpg"), None, 0, 0, 0))
+        self.arrayComponente.append(Component(win, pg.image.load(
+            "../assets/create/fondo.png"), None, 25, 82.5, 0))
+        self.arrayBackground.append(self.f_1)
+        self.arrayBackground.append(self.f_2)
+        self.arrayBackground.append(self.f_3)
+        self.arrayComponente = self.arrayComponente + self.arrayBackground
+        self.arrayComponente.append(Component(win, pg.image.load(
+            "../assets/create/enemigo.png"), None,25 , 292.5, 0))
+        self.arrayEnemy.append(self.e_1)
+        self.arrayEnemy.append(self.e_2)
+        self.arrayComponente = self.arrayComponente + self.arrayEnemy
+        self.arrayWeapon.append(self.w_1)
+        self.arrayWeapon.append(self.w_2)
+        self.arrayWeapon.append(self.w_3)
+        self.arrayComponente = self.arrayComponente + self.arrayWeapon
+        self.arrayComponente.append(self.back)
+        self.arrayComponente.append(self.run)
+
+    def __init_componets(self):
+        self.arrayBackground[0].active(True)
+        self.arrayEnemy[0].active(True)
+        self.arrayWeapon[0].active(True)
+
+    def __active_group(self, group, element, type):
+        element.active(True)
+        index = group.index(element)
+        if type == "BG":
+            self.background = index + 1
+        if type == "ENEMY":
+            self.enemy = index + 1
+        if type == "WEAPON":
+            self.weapon = index + 1
+        for component in group:
+            if group.index(component) != index:
+                component.active(False)
+
+
 
