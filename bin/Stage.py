@@ -659,4 +659,84 @@ class Ranking():
         r = requests.get(URL_API + "/ranking")
         return r.json()
 
+class SelectLevel():
+
+    def __init__(self, game, win):
+        self.game = game
+        self.win = win
+        self.arrayComponente = []
+        self.back = Component(win, pg.image.load(
+            "../assets/select/back.png"), None, 20, 20, 0)
+        self.One = Component(self.win, pg.image.load("../assets/select/one.png"), None, 99, 130, 0)
+        self.Two = Component(self.win, pg.image.load("../assets/select/two.png"), None, 414, 130, 0)
+        self.create = Component(self.win, pg.image.load("../assets/select/create.png"), None, 729, 130, 0)
+        self.__loadComponents()
+
+    def draw(self):
+        for component in self.arrayComponente:
+            component.draw()
+            component.hover()
+
+    def events(self):
+        mouse = pg.mouse.get_pos()
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                pg.quit()
+                sys.exit()
+            if event.type == pg.MOUSEBUTTONDOWN:
+                if self.back.inside(mouse[0], mouse[1]):
+                    self.game.click_sound()
+                    self.goMenu()
+                if self.One.inside(mouse[0], mouse[1]):
+                    self.game.click_sound()
+                    self.goNivelOne()
+                if self.Two.inside(mouse[0], mouse[1]):
+                    self.game.click_sound()
+                    self.goNivelTwo()
+                if self.create.inside(mouse[0], mouse[1]):
+                    self.game.click_sound()
+                    self.goNivelCreate()
+                   
+
+    def update(self):
+        pass
+
+    def goOptions(self):
+        pass
+
+    def goMenu(self):
+        self.game.changeState(MenuStage(self.game, self.win))
+
+    def goNivelOne(self):
+        self.game.changeState(NivelOne(self.game, self.win))
+    
+    def goNivelTwo(self):
+        self.game.changeState(NivelTwo(self.game, self.win))
+
+    def goNivelCreate(self):
+        self.game.changeState(NivelCreate(self.game, self.win))
+
+    def __loadComponents(self):
+        self.arrayComponente.append(
+            Component(self.win, pg.image.load("../assets/select/bg.jpg"), None, 0, 0, 0))
+        self.arrayComponente.append(
+            Component(self.win, pg.image.load("../assets/select/tabla.png"), None, 15, 200, 0))
+        self.arrayComponente.append(
+            Component(self.win, pg.image.load("../assets/select/tabla.png"), None, 330, 200, 0))
+        self.arrayComponente.append(
+            Component(self.win, pg.image.load("../assets/select/tabla.png"), None, 645, 200, 0))
+
+        self.arrayComponente.append(
+            Component(self.win, pg.image.load("../assets/select/level_one.png"), None, 40, 225, 0))
+        self.arrayComponente.append(
+            Component(self.win, pg.image.load("../assets/select/level_two.png"), None, 355, 215, 0))
+        self.arrayComponente.append(
+            Component(self.win, pg.image.load("../assets/select/level_create.png"), None, 670, 215, 0))
+
+        self.arrayComponente.append(self.One)
+        self.arrayComponente.append(self.Two)
+        self.arrayComponente.append(self.create)
+        
+
+        self.arrayComponente.append(self.back)
 
