@@ -47,7 +47,7 @@ class MenuStage():
                     self.goOptions()
                 if self.play.inside(mouse[0], mouse[1]):
                     self.game.click_sound()
-                    self.goNivelOne()
+                    self.goSelect()
                 if self.ranking.inside(mouse[0], mouse[1]):
                     self.goRanking()
 
@@ -60,8 +60,8 @@ class MenuStage():
     def goMenu(self):
         pass
 
-    def goNivelOne(self):
-        self.game.changeState(NivelOne(self.game, self.win))
+    def goSelect(self):
+        self.game.changeState(SelectLevel(self.game, self.win))
     
     def goRanking(self):
         self.game.changeState(Ranking(self.game, self.win))
