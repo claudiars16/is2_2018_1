@@ -6,6 +6,7 @@ from db.database import Database
 from Sprites import *
 import requests as requests
 import json
+from random import randint
 
 
 class MenuStage():
@@ -74,7 +75,6 @@ class MenuStage():
         self.arrayComponente.append(self.options)
         self.arrayComponente.append(self.exit)
         self.arrayComponente.append(self.ranking)
-
 
 class OptionStage():
 
@@ -202,7 +202,6 @@ class OptionStage():
             if group.index(component) != index:
                 component.active(False)
 
-
 class CreditsStage():
     def __init__(self, game, win):
         self.game = game
@@ -264,7 +263,6 @@ class CreditsStage():
             "../assets/credits/casanova.png"), None, 676, 550, 0))
         self.arrayComponente.append(self.back)
 
-
 class NivelOne():
     def __init__(self, game, win):
         self.game = game
@@ -275,31 +273,33 @@ class NivelOne():
         self.floor = Component(win, pg.image.load(
             "../assets/one/floor.png"), None, 0, FLOOR, 0)    
         self.win.blit(self.bg.currentImage, (0, 0))
-        self.win.blit(self.floor.currentImage, (0, 0))
         self.bgWidth, self.bgHeight = self.bg.currentImage.get_rect().size
         self.stageWidth = self.bgWidth * 4
         self.startScrollingPosX = HW
         self.stagePosX = 0
         self.pauseState = False
         self.loseState = False
+        self.winState = False
         self.name = ""
         # CONJUNTO DE IMAGENES
         self.players = pg.sprite.Group()
         self.enemys = pg.sprite.Group()
         self.platforms = pg.sprite.Group()
+        self.flags = pg.sprite.Group()
         self.bases = pg.sprite.Group()
         self.lifes = pg.sprite.Group()
         self.tumis = pg.sprite.Group()
         self.foods = pg.sprite.Group()
         self.bullets = pg.sprite.Group()
+        self.bullets_enemy = pg.sprite.Group()
         self.spritesheet = Spritesheet("../assets/one/player{}.png".format(self.game.suit))
         self.spritesheet_enemy = Spritesheet("../assets/one/enemy.png")
         #ADD PLAYER
         self.player = Player(self)
         self.players.add(self.player)
         #ADD ENEMY
-        self.enemy1 = Enemy(self, 600, FLOOR-65)
-        self.enemy2 = Enemy(self, 1000, FLOOR-65)
+        self.enemy1 = Enemy(self, 600, FLOOR-65,1)
+        self.enemy2 = Enemy(self, 1000, FLOOR-65,1)
         self.enemys.add(self.enemy1)
         self.enemys.add(self.enemy2)
         #ADD PLATFORMS
@@ -337,6 +337,9 @@ class NivelOne():
         #ADD FOOD
         f1 = Food(1160 , FLOOR - 125)
         self.foods.add(f1)
+        #ADD FLAG
+        flag  = Flag(self.stageWidth-30,FLOOR-100)
+        self.flags.add(flag)
         #LETRA
         self.myfont = pg.font.SysFont("monospace", 20, True)
         self.myfontNumber = pg.font.SysFont("monospace", 30, True)
@@ -352,6 +355,7 @@ class NivelOne():
         self.arrayComponents = []
         self.arrayPause = []
         self.arrayLose = []
+        self.arrayWin = []
         self.pause = Component(win , pg.image.load(
             "../assets/one/pause.png") , None , 905 , 5 , 0)
         #LOAD COMPONENTS PAUSE
@@ -362,17 +366,25 @@ class NivelOne():
         self.exit = Component(win, pg.image.load("../assets/pause/btn_exit.png"),
                               pg.image.load("../assets/pause/btn_alt_exit.png"), 502.6, 250, 1)
         
-        #LOAD COMPONENTS LOSE
-        self.marco_lose = Component(win , pg.image.load(
+        #LOAD COMPONENTS LOSE / WIN
+        self.marco = Component(win , pg.image.load(
             "../assets/lose/tabla.png") , None ,230 , 70 , 0)
+        self.marco_win = Component(win , pg.image.load(
+            "../assets/lose/tabla_win.png") , None ,230 , 70 , 0)
         self.game_over_title = Component(win , pg.image.load(
             "../assets/lose/game_over_title.png") , None ,262 , 127 , 0)
+        self.win_title = Component(win , pg.image.load(
+            "../assets/lose/win_title.png") , None ,262 , 127 , 0)
         self.save = Component(win, pg.image.load("../assets/lose/btn_guardar.png"),
                               pg.image.load("../assets/lose/btn_alt_guardar.png"), 325.3, 453, 1)
         self.exit_lose = Component(win, pg.image.load("../assets/lose/btn_exit.png"),
                               pg.image.load("../assets/lose/btn_alt_exit.png"), 502.6, 453, 1)
+        self.continue_win = Component(win, pg.image.load("../assets/lose/btn_exit.png"),
+                              pg.image.load("../assets/lose/btn_alt_exit.png"), 414, 368, 1)
         self.player_dead = Component(win, pg.image.load(
             "../assets/lose/player_{}_dead.png".format(self.game.suit)), None, 415, 250, 1)
+        self.player_win = Component(win, pg.image.load(
+            "../assets/lose/player_{}_win.png".format(self.game.suit)), None, 415, 250, 1)
         self.lose_tumi = Component(win, pg.image.load(
             "../assets/lose/tumi.png"), None, 310, 250, 1)
         self.lose_food = Component(win, pg.image.load(
@@ -389,6 +401,8 @@ class NivelOne():
         self.tumis.draw(self.win)
         self.foods.draw(self.win)
         self.bullets.draw(self.win)
+        self.bullets_enemy.draw(self.win)
+        self.flags.draw(self.win)
         #RENDER POINTS
         label = self.myfont.render("PUNTAJE : {}".format(self.poits), 1, BLACK)
         self.win.blit(label, (5, 0))
@@ -417,6 +431,14 @@ class NivelOne():
             s_food = self.myfontNumber.render(str(self.nfoods), 1, BLACK)
             self.win.blit(s_tumis, (320, 355))
             self.win.blit(s_food, (620, 330))
+        if self.winState:
+            for component in self.arrayWin:
+                component.draw()
+                component.hover()
+            s_tumis = self.myfontNumber.render(str(self.poits), 1, BLACK)
+            s_food = self.myfontNumber.render(str(self.nfoods), 1, BLACK)
+            self.win.blit(s_tumis, (320, 355))
+            self.win.blit(s_food, (620, 330))
 
     def events(self):
         mouse = pg.mouse.get_pos()
@@ -432,10 +454,10 @@ class NivelOne():
             if event.type == pg.QUIT:
                 pg.quit()
                 sys.exit()
-            if not self.pauseState and  not self.loseState:
+            if not self.pauseState and  not self.loseState and not self.winState:
                 if event.type == pg.KEYDOWN:
                     if  event.key == pg.K_UP:
-                        self.player.jump()
+                        self.player.jump(1)
                     if event.key == pg.K_SPACE:
                         self.player.shoot()
                 if event.type == pg.MOUSEBUTTONDOWN:
@@ -460,14 +482,20 @@ class NivelOne():
                         self.save_score()
                     if self.exit_lose.inside(mouse[0], mouse[1]):
                         self.goMenu()
+            if self.winState:
+                if event.type == pg.MOUSEBUTTONDOWN:
+                    if self.continue_win.inside(mouse[0], mouse[1]):
+                        self.goMenu()
                         
 
-        if not self.pauseState and not self.loseState:
+        if not self.pauseState and not self.loseState and not self.winState:
             self.player.move(move)
             self.move_screen(move)
 
     def update(self):
-        self.bullets.update()
+        if not self.pauseState and  not self.loseState and not self.winState:
+            self.bullets.update()
+            self.bullets_enemy.update()
         for enemy in self.enemys:
             enemy.animate()
         self.player.jumping = True
@@ -510,25 +538,44 @@ class NivelOne():
         if hits_enemy:
             self.loseState = True
         
+        #CHECK HIT TO ENMY BULLET
+        hits_enemy = pg.sprite.spritecollide(self.player, self.bullets_enemy , False)
+        if hits_enemy:
+            self.loseState = True
+        
         #CHECK IF BULLET TO ENEMY
         for bullet in self.bullets:
             hits_bullet =  pg.sprite.spritecollide(bullet, self.enemys , True)
+            hits_b_b = pg.sprite.spritecollide(bullet, self.bullets_enemy , True)
             if hits_bullet:
-                self.poits += 20
                 bullet.kill()
+                self.poits += 30
+            if hits_b_b:
+                bullet.kill()
+        
+        #CHECK IF WIIN
+        hits_flag = pg.sprite.spritecollide(self.player, self.flags , False)
+        if hits_flag:
+            self.winState = True
 
     def __loadComponents(self):
         self.arrayComponents.append(self.pause)
         self.arrayPause.append(self.marco_pause)
         self.arrayPause.append(self.play)
         self.arrayPause.append(self.exit)
-        self.arrayLose.append(self.marco_lose)
+        self.arrayLose.append(self.marco)
         self.arrayLose.append(self.exit_lose)
         self.arrayLose.append(self.save)
         self.arrayLose.append(self.game_over_title)
         self.arrayLose.append(self.player_dead)
         self.arrayLose.append(self.lose_tumi)
         self.arrayLose.append(self.lose_food)
+        self.arrayWin.append(self.marco_win)
+        self.arrayWin.append(self.continue_win)
+        self.arrayWin.append(self.win_title)
+        self.arrayWin.append(self.player_win)
+        self.arrayWin.append(self.lose_tumi)
+        self.arrayWin.append(self.lose_food)
 
     def goPause(self, state):
         self.pauseState = state
@@ -552,13 +599,13 @@ class NivelOne():
             self.tumis.update(self.player.des)
             self.foods.update(self.player.des)
             self.enemys.update(self.player.des)
+            self.flags.update(self.player.des)
     
     def save_score(self):
         payload = {"nombre" : self.name , "puntaje" : self.poits}
         r = requests.post(URL_API + "/ranking", data=payload)
         print("Status : {}".format(r.status_code))
         self.goMenu()
-
 
 class Ranking():
 
