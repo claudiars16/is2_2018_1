@@ -1201,5 +1201,219 @@ class NivelCreate():
             if group.index(component) != index:
                 component.active(False)
 
+class NivelThree():
+    def __init__(self, game, win, background, enemy , weapon):
+        self.game = game
+        self.win = win
+        self.arrayComponente = []
+        self.bg = Component(win, pg.image.load(
+            "../assets/three/f{}.png".format(background)), None, 0, 0, 0)
+        self.win.blit(self.bg.currentImage, (0, 0))
+        self.bgWidth, self.bgHeight = self.bg.currentImage.get_rect().size
+        self.stageWidth = self.bgWidth
+        self.startScrollingPosX = HW
+        self.stagePosX = 0
+        self.pauseState = False
+        self.loseState = False
+        self.winState = False
+        self.name = ""
+        self.last_update = 0
+        self.points = 0
+        # CONJUNTO DE IMAGENES
+        self.players = pg.sprite.Group()
+        self.monsters = pg.sprite.Group()
+        self.bullets = pg.sprite.Group()
+        self.spritesheet = Spritesheet("../assets/one/player{}.png".format(self.game.suit))
+        self.spritesheet_enemy = Spritesheet("../assets/three/enemy{}.png".format(enemy))
+        #ADD PLAYER
+        self.player = Player(self,weapon)
+        self.players.add(self.player)
+        #ADD MONSTERS
+        self.enemy = enemy
+        self.monster1 = Monster(self,400,100,self.enemy,-1)
+        self.monsters.add(self.monster1)
+        #LETRA
+        self.myfont = pg.font.SysFont("monospace", 20, True)
+        #LOAD COMPONENTS
+        self.arrayComponents = []
+        self.arrayPause = []
+        self.arrayLose = []
+        self.arrayWin = []
+        self.pause = Component(win , pg.image.load(
+            "../assets/one/pause.png") , None , 905 , 5 , 0)
+        #LOAD COMPONENTS PAUSE
+        self.marco_pause = Component(win , pg.image.load(
+            "../assets/pause/pause_marco.png") , None ,280 , 160 , 0)
+        self.play = Component(win, pg.image.load("../assets/pause/btn_play.png"),
+                              pg.image.load("../assets/pause/btn_alt_play.png"), 325.3, 250, 1)
+        self.exit = Component(win, pg.image.load("../assets/pause/btn_exit.png"),
+                              pg.image.load("../assets/pause/btn_alt_exit.png"), 502.6, 250, 1)
+        
+        #LOAD COMPONENTS LOSE / WIN
+        self.marco = Component(win , pg.image.load(
+            "../assets/lose/tabla.png") , None ,230 , 70 , 0)
+        self.marco_win = Component(win , pg.image.load(
+            "../assets/lose/tabla_win.png") , None ,230 , 70 , 0)
+        self.game_over_title = Component(win , pg.image.load(
+            "../assets/lose/game_over_title.png") , None ,262 , 127 , 0)
+        self.win_title = Component(win , pg.image.load(
+            "../assets/lose/win_title.png") , None ,262 , 127 , 0)
+        self.save = Component(win, pg.image.load("../assets/lose/btn_guardar.png"),
+                              pg.image.load("../assets/lose/btn_alt_guardar.png"), 325.3, 453, 1)
+        self.exit_lose = Component(win, pg.image.load("../assets/lose/btn_exit.png"),
+                              pg.image.load("../assets/lose/btn_alt_exit.png"), 502.6, 453, 1)
+        self.continue_win = Component(win, pg.image.load("../assets/lose/btn_exit.png"),
+                              pg.image.load("../assets/lose/btn_alt_exit.png"), 414, 368, 1)
+        self.player_dead = Component(win, pg.image.load(
+            "../assets/lose/player_{}_dead.png".format(self.game.suit)), None, 415, 250, 1)
+        self.player_win = Component(win, pg.image.load(
+            "../assets/lose/player_{}_win.png".format(self.game.suit)), None, 415, 250, 1)
+        self.lose_tumi = Component(win, pg.image.load(
+            "../assets/lose/tumi.png"), None, 310, 250, 1)
+        self.lose_food = Component(win, pg.image.load(
+            "../assets/lose/food.png"), None, 600, 270, 1)
+        
+        self.__loadComponents()
+        
+    def draw(self):
+        self.players.draw(self.win)
+        self.monsters.draw(self.win)
+        self.bullets.draw(self.win)
+        #RENDER POINTS
+        label = self.myfont.render("PUNTAJE : {}".format(self.points), 1, BLACK)
+        self.win.blit(label, (5, 0))
+        for component in self.arrayComponents:
+            component.draw()
+        if  self.pauseState:
+            for component in self.arrayPause:
+                component.draw()
+                component.hover()
+        if self.loseState:
+            for component in self.arrayLose:
+                component.draw()
+                component.hover()
+            #RENDER NAME
+            pg.draw.rect(self.win,(255,255,255),(330,400,300,40))
+            n = self.myfont.render(self.name, 1, BLACK)
+            self.win.blit(n, (350,410))
+        if self.winState:
+            for component in self.arrayWin:
+                component.draw()
+                component.hover()
+
+    def events(self):
+        mouse = pg.mouse.get_pos()
+        move = 0
+        k = pg.key.get_pressed()
+        if k[pg.K_RIGHT]:
+            move  = 1
+            self.player.side = 1
+        elif k[pg.K_LEFT]:
+            move = -1
+            self.player.side = -1
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                pg.quit()
+                sys.exit()
+            if not self.pauseState and  not self.loseState and not self.winState:
+                if event.type == pg.KEYDOWN:
+                    if  event.key == pg.K_SPACE:
+                        self.player.jump(3)
+                    if event.key == pg.K_TAB:
+                        self.player.shoot()
+                if event.type == pg.MOUSEBUTTONDOWN:
+                    if self.pause.inside(mouse[0], mouse[1]):
+                        self.goPause(True)
+            if self.pauseState:
+                if event.type == pg.MOUSEBUTTONDOWN:
+                    if self.play.inside(mouse[0], mouse[1]):
+                        self.goPause(False)
+                    if self.exit.inside(mouse[0], mouse[1]):
+                        self.goMenu()
+            if self.loseState:
+                if event.type == pg.KEYDOWN:
+                    if event.unicode.isalpha():
+                        self.name += event.unicode
+                    elif event.key == pg.K_BACKSPACE:
+                        self.name = self.name[:-1]
+                    elif event.key == pg.K_RETURN:
+                        self.name = ""
+                if event.type == pg.MOUSEBUTTONDOWN:
+                    if self.save.inside(mouse[0], mouse[1]):
+                        self.save_score()
+                    if self.exit_lose.inside(mouse[0], mouse[1]):
+                        self.goMenu()
+            if self.winState:
+                if event.type == pg.MOUSEBUTTONDOWN:
+                    if self.exit_lose.inside(mouse[0], mouse[1]):
+                        self.goMenu()
+                        
+
+        if not self.pauseState and not self.loseState and not self.winState:
+            self.player.move(move)
+            self.move_screen(move)
+
+    def update(self):
+        now = pg.time.get_ticks()
+        if now - self.last_update > 1500:
+            self.last_update = now
+            height = randint(30, 600)
+            rand = randint(0, 1)
+            side = 1 if rand == 0 else -1
+            begin = -100 if rand == 0 else self.stageWidth
+            monster = Monster(self,begin,height,self.enemy,side)
+            self.monsters.add(monster)
+
+        self.bullets.update()
+
+        #CHECK HIT TO ENMY
+        hits_monsters = pg.sprite.spritecollide(self.player, self.monsters , False, pg.sprite.collide_mask)
+        if hits_monsters:
+            self.loseState = True
+
+        #CHECK IF BULLET TO MONSTERS
+        for bullet in self.bullets:
+            hits_bullet =  pg.sprite.spritecollide(bullet, self.monsters , True)
+            if hits_bullet:
+                self.points += 30
+                bullet.kill()
+
+        if not self.pauseState and not self.loseState and not self.winState:
+            self.monsters.update()
+
+    def __loadComponents(self):
+        self.arrayComponents.append(self.pause)
+        self.arrayPause.append(self.marco_pause)
+        self.arrayPause.append(self.play)
+        self.arrayPause.append(self.exit)
+        self.arrayLose.append(self.marco)
+        self.arrayLose.append(self.exit_lose)
+        self.arrayLose.append(self.save)
+        self.arrayLose.append(self.game_over_title)
+        self.arrayLose.append(self.player_dead)
+        self.arrayWin.append(self.marco_win)
+        self.arrayWin.append(self.continue_win)
+        self.arrayWin.append(self.win_title)
+        self.arrayWin.append(self.player_win)
+
+    def goPause(self, state):
+        self.pauseState = state
+
+    def goMenu(self):
+        self.game.changeState(MenuStage(self.game, self.win))
+
+    def move_screen(self, dir):
+        rel_x = round(self.stagePosX % self.bgWidth,0)
+        self.win.blit(self.bg.currentImage,
+                            (rel_x - self.bgWidth, 0))
+        
+        if rel_x < WIDTH:
+            self.win.blit(self.bg.currentImage, (rel_x, 0))
+
+    def save_score(self):
+        payload = {"nombre" : self.name , "puntaje" : self.points}
+        r = requests.post(URL_API + "/ranking", data=payload)
+        print("Status : {}".format(r.status_code))
+        self.goMenu()
 
 
